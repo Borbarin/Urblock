@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Однократно создаёт data/users/<user>/embeddings/*.npy из vault (ускоряет вход по лицу).
+set -euo pipefail
+
+if [[ -f /etc/urblock/install.conf ]]; then
+  # shellcheck source=/dev/null
+  source /etc/urblock/install.conf
+fi
+
+PO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+GUI_ROOT="${URBLOCK_GUI_ROOT:-$PO_ROOT/../urblock_gui}"
+PYTHON="${URBLOCK_PYTHON:-$GUI_ROOT/.venv/bin/python}"
+export URBLOCK_GUI_ROOT="$GUI_ROOT" URBLOCK_DATA_DIR="${URBLOCK_DATA_DIR:-$GUI_ROOT/data}"
+
+exec "$PYTHON" - <<'PY'
+import os
+import sys
+import time
+
+sys.path.insert(0, os.environ["URBLOCK_GUI_ROOT"])
+os.environ.setdefault("URBLOCK_USER", os.environ.get("USER", "ububu"))
+
+from storage import ensure_gallery_embeddings, user_data_dir, user_has_gallery
+from vision.face_matcher import FaceMatcher
+
+user = os.environ["URBLOCK_USER"]
+if not user_has_gallery(user):
+    print(f"Нет лиц для пользователя {user} в {user_data_dir(user)}")
+    raise SystemExit(1)
+
+t0 = time.monotonic()
+matcher = FaceMatcher()
+built, count = ensure_gallery_embeddings(matcher, user_id=user)
+print(f"Готово за {time.monotonic() - t0:.1f}s: построено {built}, в галерее {count} шаблонов")
+print(f"Каталог: {user_data_dir(user) / 'embeddings'}")
+PY

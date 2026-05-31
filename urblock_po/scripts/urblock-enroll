@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -f /etc/urblock/install.conf ]]; then
+  # shellcheck source=/dev/null
+  source /etc/urblock/install.conf
+fi
+
+URBLOCK_PO_ROOT="${URBLOCK_PO_ROOT:-}"
+URBLOCK_GUI_ROOT="${URBLOCK_GUI_ROOT:-}"
+
+if [[ -z "$URBLOCK_PO_ROOT" || -z "$URBLOCK_GUI_ROOT" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  URBLOCK_PO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+  URBLOCK_GUI_ROOT="${URBLOCK_GUI_ROOT:-$URBLOCK_PO_ROOT/../urblock_gui}"
+fi
+
+URBLOCK_DATA_DIR="${URBLOCK_DATA_DIR:-$URBLOCK_GUI_ROOT/data}"
+PYTHON="${URBLOCK_PYTHON:-$URBLOCK_GUI_ROOT/.venv/bin/python}"
+export URBLOCK_PO_ROOT URBLOCK_GUI_ROOT URBLOCK_DATA_DIR
+
+if [[ ! -x "$PYTHON" ]]; then
+  PYTHON="$(command -v python3)"
+fi
+
+exec "$PYTHON" "$URBLOCK_PO_ROOT/login/enroll.py" "$@"

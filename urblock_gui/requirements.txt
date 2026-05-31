@@ -1,0 +1,4 @@
+dearpygui>=2.0
+opencv-python-headless>=4.8
+numpy>=1.24
+cryptography>=42.0

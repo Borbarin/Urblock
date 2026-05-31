@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Фоновый агент: камера при блокировке GNOME (не ждёт PAM / Enter).
+set -euo pipefail
+
+if [[ -f /etc/urblock/install.conf ]]; then
+  # shellcheck source=/dev/null
+  source /etc/urblock/install.conf
+fi
+
+URBLOCK_PO_ROOT="${URBLOCK_PO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+PYTHON="${URBLOCK_PYTHON:-$URBLOCK_PO_ROOT/../urblock_gui/.venv/bin/python}"
+export URBLOCK_PO_ROOT URBLOCK_PYTHON
+
+if [[ ! -x "$PYTHON" ]]; then
+  PYTHON="$(command -v python3)"
+fi
+
+exec "$PYTHON" "$URBLOCK_PO_ROOT/login/lock_agent.py"

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Обёртка для PAM. Пути: /etc/urblock/install.conf (после install-login.sh)
+set -euo pipefail
+
+if [[ -f /etc/urblock/install.conf ]]; then
+  # shellcheck source=/dev/null
+  source /etc/urblock/install.conf
+fi
+
+URBLOCK_PO_ROOT="${URBLOCK_PO_ROOT:-}"
+URBLOCK_GUI_ROOT="${URBLOCK_GUI_ROOT:-}"
+URBLOCK_DATA_DIR="${URBLOCK_DATA_DIR:-}"
+
+if [[ -z "$URBLOCK_PO_ROOT" || -z "$URBLOCK_GUI_ROOT" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [[ "$SCRIPT_DIR" == */scripts ]]; then
+    URBLOCK_PO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+    URBLOCK_GUI_ROOT="${URBLOCK_GUI_ROOT:-$URBLOCK_PO_ROOT/../urblock_gui}"
+  else
+    echo "urblock-verify: missing /etc/urblock/install.conf — run: sudo ./scripts/install-login.sh" >&2
+    exit 1
+  fi
+fi
+
+URBLOCK_DATA_DIR="${URBLOCK_DATA_DIR:-$URBLOCK_GUI_ROOT/data}"
+PYTHON="${URBLOCK_PYTHON:-$URBLOCK_GUI_ROOT/.venv/bin/python}"
+
+export URBLOCK_PO_ROOT URBLOCK_GUI_ROOT URBLOCK_DATA_DIR
+
+if [[ ! -x "$PYTHON" ]]; then
+  PYTHON="$(command -v python3)"
+fi
+
+VERIFY_PY="$URBLOCK_PO_ROOT/login/verify.py"
+if [[ ! -f "$VERIFY_PY" ]]; then
+  echo "urblock-verify: not found: $VERIFY_PY" >&2
+  exit 1
+fi
+
+exec "$PYTHON" "$VERIFY_PY" "$@"

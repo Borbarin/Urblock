@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# C++ / CMake
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+compile_commands.json
+*.o
+*.a
+*.out
+urblock_po/urblock_po
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Секреты и окружение
+.env
+.env.*
+!.env.example
+
+# ML-модели (большие бинарники, скачиваются отдельно)
+*.onnx
+
+# Пользовательские и биометрические данные
+urblock_gui/data/users/
+urblock_gui/data/settings.json
+urblock_gui/data/snapshots/
+urblock_gui/data/biometrics/
+urblock_gui/data/embeddings/
+urblock_gui/data/faces.json
+*.vault
+.vault_salt
